@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -10,9 +11,11 @@ import (
 	middlewares "billing/middlewares"
 	"billing/migrations"
 	l "billing/utils/logger"
+	"billing/utils/pubsub/nats"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	natslib "github.com/nats-io/nats.go"
 )
 
 func initRouterDefault() *gin.Engine {
@@ -45,6 +48,10 @@ func main() {
 	// Init Log
 	l.InitLogger()
 
+	var (
+		natsURL = os.Getenv("NATS_URL") || natslib.DefaultURL
+	)
+
 	// Start DB
 	db, err := main_db.InitDB()
 	if err != nil {
@@ -59,6 +66,13 @@ func main() {
 			migrations.MigrateDataTable()
 		}
 	}
+
+	natsConn, err := natslib.Connect(natsURL)
+	if err != nil {
+		return fmt.Errorf("could not connect to NATS server: %w", err)
+	}
+
+	pubsub := &nats.PubSub{Conn: natsConn}
 
 	// Init routes default
 	r := initRouterDefault()

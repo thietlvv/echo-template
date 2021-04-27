@@ -7,6 +7,7 @@ import (
 	. "billing/entities"
 	"billing/helper"
 	"billing/models"
+	"billing/utils/response"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,7 +30,7 @@ func GetUsers(c *gin.Context) {
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 	} else {
-		c.JSON(http.StatusOK, user)
+		response.Success(c, "", user)
 	}
 }
 
@@ -43,7 +44,7 @@ func CreateUser(c *gin.Context) {
 		fmt.Println(err.Error())
 		c.AbortWithStatus(http.StatusNotFound)
 	} else {
-		c.JSON(http.StatusOK, user)
+		response.Success(c, "", user)
 	}
 }
 
@@ -57,7 +58,7 @@ func GetUserByID(c *gin.Context) {
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 	} else {
-		c.JSON(http.StatusOK, user)
+		response.Success(c, "", user)
 	}
 }
 
@@ -76,7 +77,7 @@ func UpdateUser(c *gin.Context) {
 	if err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
 	} else {
-		c.JSON(http.StatusOK, user)
+		response.Success(c, "", user)
 	}
 }
 

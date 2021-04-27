@@ -16,7 +16,7 @@ func HealthCheck(c *gin.Context) {
 	if resultDB == "" {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"code": 4000, "message": "Service Unavailable"})
 	}
-	response.Success(c, gin.H{"DB_TIME": resultDB})
+	response.Success(c, "", resultDB)
 }
 
 // LoadTest ...

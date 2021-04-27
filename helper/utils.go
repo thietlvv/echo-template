@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -18,6 +19,19 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	guuid "github.com/google/uuid"
+)
+
+const (
+	minPageSize     = 1
+	defaultPageSize = 10
+	maxPageSize     = 99
+)
+
+var (
+	reUUID                = regexp.MustCompile("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+	reMultiSpace          = regexp.MustCompile(`(\s)+`)
+	reMoreThan2Linebreaks = regexp.MustCompile(`(\n){2,}`)
+	reMentions            = regexp.MustCompile(`\B@([a-zA-Z][a-zA-Z0-9_-]{0,17})`)
 )
 
 // PUBLIC Functions
@@ -105,6 +119,31 @@ func MakeHTTPRequest(method, url, contentType string, data interface{}, retry bo
 	}
 
 	return resHTTPStatusCode, resHTTPBody, errors.New("Max times retry exceeded")
+}
+
+func SmartTrim(s string) string {
+	oldLines := strings.Split(s, "\n")
+	newLines := []string{}
+	for _, line := range oldLines {
+		line = strings.TrimSpace(reMultiSpace.ReplaceAllString(line, "$1"))
+		newLines = append(newLines, line)
+	}
+	s = strings.Join(newLines, "\n")
+	s = reMoreThan2Linebreaks.ReplaceAllString(s, "$1$1")
+	return strings.TrimSpace(s)
+}
+
+func NormalizePageSize(i int) int {
+	if i == 0 {
+		return defaultPageSize
+	}
+	if i < minPageSize {
+		return minPageSize
+	}
+	if i > maxPageSize {
+		return maxPageSize
+	}
+	return i
 }
 
 /************************************************************/

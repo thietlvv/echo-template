@@ -2,19 +2,31 @@ package response
 
 import (
 	"net/http"
-	//"search-engine/models"
 
 	"github.com/gin-gonic/gin"
 )
 
-func Error(c *gin.Context, err error) {
-	//mega1Error, ok := err.(*models.Mega1Error)
-	//if ok == true {
-	//	return c.JSON(http.StatusOK, echo.Map{"code": mega1Error.Code, "message": mega1Error.Message})
-	//}
-	c.JSON(http.StatusOK, gin.H{"code": 4000, "message": err.Error()})
+func FormatResultAPI(status int, errStr string, data interface{}) interface{} {
+	var dataR gin.H
+	if status != 200 {
+		dataR = gin.H{
+			"message": errStr,
+			"error":   status,
+			"data":    data,
+		}
+		return dataR
+	}
+	dataR = gin.H{"data": data}
+	return dataR["data"]
 }
 
-func Success(c *gin.Context, msg map[string]interface{}) {
-	c.JSON(http.StatusOK, gin.H{"code": 2000, "data": msg})
+func Error(c *gin.Context, status int, errStr string, data interface{}, err error) {
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, FormatResultAPI(http.StatusInternalServerError, err.Error(), data))
+	}
+	c.JSON(status, FormatResultAPI(status, errStr, data))
+}
+
+func Success(c *gin.Context, msg string, data interface{}) {
+	c.JSON(http.StatusOK, FormatResultAPI(http.StatusOK, "", data))
 }
