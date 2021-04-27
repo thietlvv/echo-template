@@ -1,10 +1,8 @@
 package monitor
 
-import (
-	"github.com/labstack/echo/v4"
-)
+import "github.com/gin-gonic/gin"
 
-func Routes(g *echo.Group) {
+func Routes(g *gin.RouterGroup) {
 	gMonitor := g.Group("/m")
 
 	gMonitor.GET("/health_check", HealthCheck)

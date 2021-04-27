@@ -2,23 +2,32 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"os"
 
 	"billing/serv/urls"
 
-	db "billing/db/main_db"
+	"billing/db/main_db"
+	middlewares "billing/middlewares"
+	"billing/migrations"
 	l "billing/utils/logger"
 
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
-var err error
+func initRouterDefault() *gin.Engine {
+	// Creates a gin router with default middleware:
+	// logger and recovery (crash-free) middleware
+	r := gin.Default()
 
-func hello(c echo.Context) error {
-	return c.String(http.StatusOK, "Hello, World!")
+	// Use global middleware
+	r.Use(middlewares.RequestLog())
+
+	// Recovery middleware recovers from any panics and writes a 500 if there was one
+	r.Use(gin.Recovery())
+	// r.Use(sentry.Recovery(raven.DefaultClient, false))
+
+	return r
 }
 
 // Initiate web server
@@ -26,7 +35,7 @@ func main() {
 
 	// Load the .env file in the current directory
 	// .env already load in-case run by docker-compose
-	err = godotenv.Load()
+	err := godotenv.Load()
 	if err != nil {
 		l.Logger("", "").Warningln("Cannot get config from .env file manual - if run from docker-compose skip this warning", err)
 	} else {
@@ -37,34 +46,25 @@ func main() {
 	l.InitLogger()
 
 	// Start DB
-	err = db.InitDB()
+	db, err := main_db.InitDB()
 	if err != nil {
 		l.Logger("", "").Warningln("Can't connect RDB. ", err)
 	} else {
 		l.Logger("", "").Infoln("Database connect successful")
-		defer db.DB.Close()
+		defer db.Close()
 
 		// Auto migration
 		migration := os.Getenv("RDB_AUTO_MIGRATION")
 		if migration == "1" {
-			db.MigrateDataTable()
+			migrations.MigrateDataTable()
 		}
 	}
 
-	e := echo.New()
-	e.Use(middleware.Logger())
+	// Init routes default
+	r := initRouterDefault()
 
-	e.Use(middleware.Recover())
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		Skipper:      middleware.DefaultSkipper,
-		AllowOrigins: []string{"*"},
-		AllowMethods: []string{http.MethodGet, http.MethodHead, http.MethodPost, http.MethodDelete, http.MethodPut},
-		MaxAge:       86400,
-	}))
-	e.GET("/", hello)
-
-	// Initial Urls
-	urls.InitUrlsBilling(e)
+	// Init url routes
+	urls.InitUrlsBilling(r)
 
 	// Start server
 	runport := os.Getenv("RUN_PORT")
@@ -72,5 +72,5 @@ func main() {
 		runport = "9090"
 	}
 
-	log.Fatal(e.Start(":" + runport))
+	log.Fatal(r.Run(":" + runport)) // running
 }

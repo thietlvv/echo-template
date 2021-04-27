@@ -6,8 +6,6 @@ import (
 	"os"
 	"strconv"
 
-	models "billing/models"
-
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 
 	"github.com/jinzhu/gorm"
@@ -22,7 +20,7 @@ var dbstatus, dbhost, dbuser, dbpassword, dbname string
 var dbport int
 
 // InitDB ...
-func InitDB() error {
+func InitDB() (*gorm.DB, error) {
 	dbstatus = os.Getenv("RDB_ON")
 	dbhost = os.Getenv("RDB_HOST")
 	dbport, _ = strconv.Atoi(os.Getenv("RDB_PORT"))
@@ -31,21 +29,16 @@ func InitDB() error {
 	dbname = os.Getenv("RDB_DBNAME")
 
 	if dbstatus != "1" { // ON
-		return errors.New("RDB off by setting")
+		return DB, errors.New("RDB off by setting")
 	}
 
 	DB, err = gorm.Open("mysql", _dbURL(_buildDBConfig()))
 	if err != nil {
 		fmt.Println(err)
-		return err
+		return DB, err
 	}
 
-	return nil
-}
-
-// MigrateDataTable ...
-func MigrateDataTable() {
-	DB.AutoMigrate(&models.User{})
+	return DB, nil
 }
 
 // CheckDatabase ...

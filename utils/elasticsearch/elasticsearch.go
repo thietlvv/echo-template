@@ -1,9 +1,10 @@
 package elasticsearch
 
 import (
-	"auth/config"
+	// "auth/config"
 	"context"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/olivere/elastic/v7"
@@ -29,6 +30,10 @@ const mapping = `
 }`
 
 func InitElasticsearch(index_name string) (*elastic.Client, error) {
+	URL := os.Getenv("ES_URL")
+	User := os.Getenv("ES_USER")
+	Secret := os.Getenv("ES_SECRET")
+	IsAuth, _ := strconv.ParseBool(os.Getenv("ES_ISAUTH"))
 	env := os.Getenv("APP_ENV")
 	if env == "" {
 		env = "localhost"
@@ -37,10 +42,10 @@ func InitElasticsearch(index_name string) (*elastic.Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	var options []elastic.ClientOptionFunc
-	if config.C.Elasticsearch.IsAuth {
-		options = append(options, elastic.SetSniff(false), elastic.SetURL(config.C.Elasticsearch.URL), elastic.SetBasicAuth(config.C.Elasticsearch.User, config.C.Elasticsearch.Secret))
+	if IsAuth {
+		options = append(options, elastic.SetSniff(false), elastic.SetURL(URL), elastic.SetBasicAuth(User, Secret))
 	} else {
-		options = append(options, elastic.SetSniff(false), elastic.SetURL(config.C.Elasticsearch.URL))
+		options = append(options, elastic.SetSniff(false), elastic.SetURL(URL))
 	}
 	client, err := elastic.NewClient(options...)
 	if err != nil {

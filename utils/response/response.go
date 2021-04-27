@@ -4,17 +4,17 @@ import (
 	"net/http"
 	//"search-engine/models"
 
-	"github.com/labstack/echo/v4"
+	"github.com/gin-gonic/gin"
 )
 
-func Error(c echo.Context, err error) error {
+func Error(c *gin.Context, err error) {
 	//mega1Error, ok := err.(*models.Mega1Error)
 	//if ok == true {
 	//	return c.JSON(http.StatusOK, echo.Map{"code": mega1Error.Code, "message": mega1Error.Message})
 	//}
-	return c.JSON(http.StatusOK, echo.Map{"code": 4000, "message": err.Error()})
+	c.JSON(http.StatusOK, gin.H{"code": 4000, "message": err.Error()})
 }
 
-func Success(c echo.Context, msg map[string]interface{}) error {
-	return c.JSON(http.StatusOK, echo.Map{"code": 2000, "data": msg})
+func Success(c *gin.Context, msg map[string]interface{}) {
+	c.JSON(http.StatusOK, gin.H{"code": 2000, "data": msg})
 }

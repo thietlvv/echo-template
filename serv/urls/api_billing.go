@@ -1,25 +1,19 @@
 package urls
 
 import (
-	middlewares "billing/middlewares"
 	"billing/serv/monitor"
-	"billing/serv/tpbank"
+	"billing/serv/users"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/gin-gonic/gin"
 )
 
-func InitUrlsBilling(e *echo.Echo) {
-	e.Pre(middleware.RemoveTrailingSlash())
-	// Init log global
-	e.Use(middlewares.RequestLog)
-
+func InitUrlsBilling(r *gin.Engine) {
 	// Init group /billing
-	gBilling := e.Group("/billing")
+	gBilling := r.Group("/billing")
 
 	// Init group /billing/m
 	monitor.Routes(gBilling)
 
-	// Init group /billing/tpbank
-	tpbank.Routes(gBilling)
+	// Init group /billing/users
+	users.Routes(gBilling)
 }

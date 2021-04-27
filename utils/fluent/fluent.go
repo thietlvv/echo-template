@@ -1,7 +1,8 @@
 package fluent
 
 import (
-	"auth/config"
+	"os"
+	"strconv"
 
 	"github.com/fluent/fluent-logger-golang/fluent"
 	"github.com/labstack/gommon/log"
@@ -10,8 +11,10 @@ import (
 var F *fluent.Fluent
 
 func Init() {
+	Host := os.Getenv("FLUENT_HOST")
+	Port, _ := strconv.Atoi(os.Getenv("FLUENT_PORT"))
 	logger, err := fluent.New(fluent.Config{
-		FluentPort: config.C.Fluent.Port, FluentHost: config.C.Fluent.Host,
+		FluentPort: Port, FluentHost: Host,
 	})
 	if err != nil {
 		log.Error(err)
