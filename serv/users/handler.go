@@ -1,12 +1,15 @@
 package users
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	. "billing/entities"
 	"billing/helper"
 	"billing/models"
+	"billing/utils/pubsub/nats"
 	"billing/utils/response"
 
 	"github.com/gin-gonic/gin"
@@ -38,13 +41,13 @@ func GetUsers(c *gin.Context) {
 func CreateUser(c *gin.Context) {
 	var userModel models.UserModel
 	var user User
-	c.BindJSON(&user)
+	c.ShouldBindJSON(&user)
 	err := userModel.CreateUser(&user)
 	if err != nil {
 		fmt.Println(err.Error())
 		c.AbortWithStatus(http.StatusNotFound)
 	} else {
-		response.Success(c, "", user)
+		response.Success(c, "", &user)
 	}
 }
 
@@ -93,4 +96,27 @@ func DeleteUser(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, gin.H{"id" + id: "is deleted"})
 	}
+}
+
+// PublishUserCreated publish an event via NATS server
+func PublishUserCreated(c *gin.Context) {
+
+	// Publish order to NATS server
+	user := User{
+		Name:  "ggggggggggg",
+		Email: "hh@gmail.com",
+	}
+	userData, err := json.Marshal(user)
+	if err != nil {
+		log.Printf("could not marshal user: %v\n", err)
+		return
+	}
+
+	// Publish message on subject
+	err = nats.Pub(Subject, userData)
+	if err != nil {
+		log.Printf("could not publish user: %v\n", err)
+		return
+	}
+	c.JSON(http.StatusOK, event)
 }

@@ -7,7 +7,7 @@ type Publisher interface {
 
 // Subscriber interface.
 type Subscriber interface {
-	Sub(topic string, cb func(data []byte)) (unsub func() error, err error)
+	Sub(topic string, cb func(data []byte)) (err error)
 }
 
 // PubSub interface.

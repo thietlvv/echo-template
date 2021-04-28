@@ -22,12 +22,13 @@ require (
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/nats-io/nats.go v1.10.0
 	github.com/olivere/elastic/v7 v7.0.23
-	github.com/satori/go.uuid v1.2.0 // indirect
+	github.com/satori/go.uuid v1.2.0
 	github.com/sendgrid/rest v2.6.3+incompatible // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/tinylib/msgp v1.1.5 // indirect
 	go.mongodb.org/mongo-driver v1.5.1
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
+	google.golang.org/grpc v1.35.0
 	gorm.io/driver/mysql v1.0.5 // indirect
 	gorm.io/driver/sqlite v1.1.4 // indirect
 	gorm.io/gorm v1.21.6
