@@ -103,8 +103,10 @@ func PublishUserCreated(c *gin.Context) {
 
 	// Publish order to NATS server
 	user := User{
-		Name:  "ggggggggggg",
-		Email: "hh@gmail.com",
+		Name:    "ggggggggggg",
+		Email:   "hh@gmail.com",
+		Phone:   "01929112021",
+		Address: "hahaha",
 	}
 	userData, err := json.Marshal(user)
 	if err != nil {

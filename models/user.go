@@ -22,7 +22,7 @@ func (model *UserModel) GetAllUsers() (users []User, err error) {
 
 //CreateUser ... Insert New data
 func (model *UserModel) CreateUser(user *User) (err error) {
-	log.Printf("Received message in user service: %+v\n", user)
+	log.Printf("[CreateUser] Received message in user service: %+v\n", user)
 	if err = mainDb.DB.Create(user).Error; err != nil {
 		return err
 	}

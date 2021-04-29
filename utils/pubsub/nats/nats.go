@@ -66,6 +66,17 @@ func Sub(topic string, cb func(data []byte)) (err error) {
 	return nil
 }
 
+func QueueSub(topic, queue string, cb func(data []byte)) (err error) {
+	// Queue Subscribe
+	if _, err := PubSub.QueueSubscribe(topic, queue, func(m *nats.Msg) {
+		cb(m.Data)
+	}); err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
 func PrintMsg(m *nats.Msg) {
 	log.Printf("Received on [%s]: '%s'", m.Subject, string(m.Data))
 }

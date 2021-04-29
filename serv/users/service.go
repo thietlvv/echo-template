@@ -6,25 +6,49 @@ import (
 	l "billing/utils/logger"
 	"billing/utils/pubsub/nats"
 	"encoding/json"
-	"log"
 )
 
 func HandleCreateOrderSub() error {
-	var userModel models.UserModel
-	user := entities.User{}
-
 	err := nats.Sub(Subject, func(data []byte) {
+		var userModel *models.UserModel
+
 		var err error
+		var user *entities.User
 		err = json.Unmarshal(data, &user)
 		if err != nil {
 			l.Logger("", "").Errorln("could not unmarshal user: ", err)
 			return
 		}
 		// Handle the message
+		err = userModel.CreateUser(user)
+		if err != nil {
+			l.Logger("", "").Errorln("could not store users: ", err)
+			return
+		}
+		l.Logger("", "").Infoln("store users successfully")
+	})
 
-		log.Printf("&user:: %+v\n", user)
+	if err != nil {
+		l.Logger("", "").Errorln("could not subscribe to users: ", err)
+		return err
+	}
 
-		err = userModel.CreateUser(&user)
+	return nil
+}
+
+func HandleCreateOrderQueueSub() error {
+	err := nats.QueueSub(Subject, Queue, func(data []byte) {
+		var userModel *models.UserModel
+
+		var err error
+		var user *entities.User
+		err = json.Unmarshal(data, &user)
+		if err != nil {
+			l.Logger("", "").Errorln("could not unmarshal user: ", err)
+			return
+		}
+		// Handle the message
+		err = userModel.CreateUser(user)
 		if err != nil {
 			l.Logger("", "").Errorln("could not store users: ", err)
 			return

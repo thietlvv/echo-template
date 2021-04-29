@@ -2,6 +2,7 @@ package helper
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -28,10 +29,10 @@ const (
 )
 
 var (
-	reUUID                = regexp.MustCompile("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+	// reUUID                = regexp.MustCompile("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 	reMultiSpace          = regexp.MustCompile(`(\s)+`)
 	reMoreThan2Linebreaks = regexp.MustCompile(`(\n){2,}`)
-	reMentions            = regexp.MustCompile(`\B@([a-zA-Z][a-zA-Z0-9_-]{0,17})`)
+	// reMentions            = regexp.MustCompile(`\B@([a-zA-Z][a-zA-Z0-9_-]{0,17})`)
 )
 
 // PUBLIC Functions
@@ -119,6 +120,49 @@ func MakeHTTPRequest(method, url, contentType string, data interface{}, retry bo
 	}
 
 	return resHTTPStatusCode, resHTTPBody, errors.New("Max times retry exceeded")
+}
+
+func PostAPIJson(url string, data interface{}) ([]byte, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+
+	dataByte, _ := json.Marshal(data)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(dataByte))
+	req.Header.Set("X-Custom-Header", "myvalue")
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	req = req.WithContext(ctx)
+	res, err := client.Do(req)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	body, _ := ioutil.ReadAll(res.Body)
+	return body, nil
+}
+
+func PostAPI(url string) ([]byte, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequest("POST", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req = req.WithContext(ctx)
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+
+	return body, nil
 }
 
 func SmartTrim(s string) string {
