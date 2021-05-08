@@ -7,9 +7,10 @@ import (
 	"billing/serv/urls"
 
 	"billing/db/main_db"
+	"billing/db/redis"
 	middlewares "billing/middlewares"
 	"billing/migrations"
-	l "billing/utils/logger"
+	logger "billing/utils/logger"
 	"billing/utils/pubsub/nats"
 
 	"github.com/gin-gonic/gin"
@@ -38,20 +39,20 @@ func main() {
 	// .env already load in-case run by docker-compose
 	err := godotenv.Load()
 	if err != nil {
-		l.Logger("", "").Warningln("Cannot get config from .env file manual - if run from docker-compose skip this warning", err)
+		logger.Logger("", "").Warningln("Cannot get config from .env file manual - if run from docker-compose skip this warning", err)
 	} else {
-		l.Logger("", "").Infoln("Get config from .env successful")
+		logger.Logger("", "").Infoln("Get config from .env successful")
 	}
 
 	// Init Log
-	l.InitLogger()
+	logger.InitLogger()
 
 	// Start DB
 	db, err := main_db.InitDB()
 	if err != nil {
-		l.Logger("", "").Warningln("Can't connect RDB. ", err)
+		logger.Logger("", "").Warningln("Can't connect RDB. ", err)
 	} else {
-		l.Logger("", "").Infoln("Database connect successful")
+		logger.Logger("", "").Infoln("Database connect successful")
 		defer db.Close()
 
 		// Auto migration
@@ -63,9 +64,14 @@ func main() {
 
 	err = nats.InitNats()
 	if err != nil {
-		l.Logger("", "").Warningln("could not connect to NATS server: ", err)
+		logger.Logger("", "").Warningln("could not connect to NATS server: ", err)
 	} else {
-		l.Logger("", "").Infoln("NATS server connect successful")
+		logger.Logger("", "").Infoln("NATS server connect successful")
+	}
+
+	redisClient := redis.GetClient()
+	if redisClient != nil {
+		logger.Logger("", "").Infoln("Redis server connect successful")
 	}
 
 	// Init routes default
