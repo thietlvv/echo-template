@@ -5,7 +5,6 @@ import "gorm.io/gorm"
 // User ...
 type User struct {
 	gorm.Model
-	ID      uint   `json:"id"`
 	Name    string `json:"name"`
 	Email   string `json:"email"`
 	Phone   string `json:"phone"`
@@ -13,6 +12,6 @@ type User struct {
 }
 
 // TableName ...
-func (b *User) TableName() string {
+func (user *User) TableName() string {
 	return "user"
 }

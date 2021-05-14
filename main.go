@@ -10,7 +10,6 @@ import (
 	middlewares "billing/middlewares"
 	"billing/migrations"
 	l "billing/utils/logger"
-	"billing/utils/pubsub/nats"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -61,12 +60,12 @@ func main() {
 		}
 	}
 
-	err = nats.InitNats()
-	if err != nil {
-		l.Logger("", "").Warningln("could not connect to NATS server: ", err)
-	} else {
-		l.Logger("", "").Infoln("NATS server connect successful")
-	}
+	// err = nats.InitNats()
+	// if err != nil {
+	// 	l.Logger("", "").Warningln("could not connect to NATS server: ", err)
+	// } else {
+	// 	l.Logger("", "").Infoln("NATS server connect successful")
+	// }
 
 	// Init routes default
 	r := initRouterDefault()
